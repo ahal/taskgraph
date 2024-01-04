@@ -10,3 +10,4 @@ connecting your repository with Taskcluster to running tasks.
    getting-started
    creating-a-task-graph
    connecting-taskcluster
+   setting-up-new-kinds
