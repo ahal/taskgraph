@@ -513,6 +513,20 @@ class TaskGraphGenerator:
             f"Adding {len(always_target_tasks) - len(always_target_tasks & target_tasks)} tasks with `always_target` attribute"  # type: ignore
         )
         requested_tasks = target_tasks | always_target_tasks  # type: ignore
+
+        # Ensure if a task has any `if-dependencies`, it isn't responsible for
+        # pulling any of them into the target graph when computing the
+        # transitive closure.
+        for label in requested_tasks:
+            task = all_tasks[label]
+            if_dep_labels = {task.dependencies[e] for e in task.if_dependencies}
+
+            # Find any if-dependencies that aren't in `requested_tasks` and
+            # delete them.
+            for missing in if_dep_labels - requested_tasks:
+                task.if_dependencies.remove(m)
+                del task.dependencies[m]
+
         target_graph = full_task_graph.graph.transitive_closure(requested_tasks)
         target_task_graph = TaskGraph(
             {l: all_tasks[l] for l in target_graph.nodes},
